@@ -1,0 +1,2 @@
+# Segitigaeksposur
+Belajar segitiga eksposur
