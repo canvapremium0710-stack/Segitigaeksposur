@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ayo Berlatih! Simulator Segitiga Eksposur</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--wine:#6b3a42;--mauve:#b09a9b;--mauve-l:#efe6e6;--bg:#faf7f7;--card:#fff;--ink:#2b1c1f;--mute:#6e5c5f;--line:#d9cccd;--ok:#2f7a4f;--bad:#a8323e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--wine:#c98a95;--mauve:#8a7274;--mauve-l:#2f2124;--bg:#1b1315;--card:#251a1d;--ink:#f1e8e9;--mute:#b9a6a9;--line:#4a373b;--ok:#6fcf97;--bad:#ff8a95;color-scheme:dark}}
+:root[data-theme="dark"]{--wine:#c98a95;--mauve:#8a7274;--mauve-l:#2f2124;--bg:#1b1315;--card:#251a1d;--ink:#f1e8e9;--mute:#b9a6a9;--line:#4a373b;--ok:#6fcf97;--bad:#ff8a95;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,sans-serif;font-size:15px;line-height:1.65}
+main{max-width:760px;margin:0 auto;padding:20px 18px 50px}
+.hero{background:#6b3a42;color:#fff;border-radius:6px;padding:18px 20px;margin-bottom:16px}
+.hero h1{margin:0;font-size:24px;line-height:1.25}
+.hero p{margin:6px 0 0;font-size:13px;opacity:.92}
+.bar{background:#6b3a42;color:#fff;border-radius:4px;padding:9px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center;font-weight:600;font-size:14px;margin:0 0 10px}
+.bar span{background:#b09a9b;padding:1px 10px;border-radius:3px;font-size:12px;font-weight:500}
+.mission{background:var(--mauve-l);border-left:5px solid var(--wine);border-radius:3px;padding:12px 16px;margin-bottom:16px;font-size:14px}
+.mission ul{list-style:none;padding:0;margin:8px 0 0}
+.mission li{display:flex;gap:8px;align-items:center;margin-bottom:2px}
+.mission li::before{content:"○";color:var(--mute);font-weight:700}
+.mission li.done::before{content:"✓";color:var(--ok)}
+.mission li.done{color:var(--ok);font-weight:500}
+.sim{background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.scene{position:relative;height:280px;overflow:hidden;background:#2a2024}
+.bgl{position:absolute;inset:-20px;transition:filter .2s}
+.bgl i{position:absolute;border-radius:50%}
+.obj{position:absolute;left:50%;top:50%;width:100px;height:189px;margin:-94px 0 0 -50px;transition:filter .2s}
+.shade{position:absolute;inset:0;pointer-events:none;transition:background .2s}
+.noise{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;transition:opacity .2s}
+.ctl{padding:14px 16px}
+.row{display:grid;grid-template-columns:92px 1fr 62px;gap:10px;align-items:center;margin-bottom:6px;font-size:13.5px}
+.row b{font-weight:600}
+.row output{text-align:right;font-weight:600;color:var(--wine)}
+input[type=range]{width:100%;accent-color:var(--wine)}
+.read{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;font-size:12.5px}
+.read div{background:var(--mauve-l);border-radius:4px;padding:6px 8px}
+.read b{display:block;font-size:11.5px;color:var(--mute);font-weight:500}
+button.preset{font:inherit;font-size:13px;background:var(--wine);color:#fff;border:0;border-radius:4px;padding:6px 12px;cursor:pointer;margin:10px 8px 0 0}
+:root[data-theme="dark"] button.preset,:root:not([data-theme="light"]) button.preset{color:#1b1315}
+button.alt{background:var(--mauve)!important;color:#fff!important}
+button:focus-visible,input:focus-visible{outline:3px solid var(--mauve);outline-offset:2px}
+.win{display:none;margin-top:12px;background:color-mix(in srgb,var(--ok) 15%,var(--card));border:1px solid var(--ok);border-radius:6px;padding:10px 14px;font-size:14px}
+.win.show{display:block}
+.guide{margin-top:18px;font-size:13.5px}
+.guide h2{font-size:16px;margin:0 0 8px;color:var(--wine)}
+.guide ul{padding-left:20px;margin:0}
+.guide li{margin-bottom:4px}
+@media (max-width:520px){.row{grid-template-columns:78px 1fr 54px}.hero h1{font-size:20px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<div class="hero"><h1>Ayo Berlatih!</h1><p>Simulator Segitiga Eksposur · Bab 3 · Teknik Pengoperasian Kamera</p></div>
+
+<div class="mission" id="mission">
+  <b>Misi:</b> atur kamera agar foto kemasan jus memenuhi semua kriteria proyek.
+  <ul>
+    <li id="m1">Cahaya cukup (tidak gelap, tidak terlalu terang)</li>
+    <li id="m2">Objek tampak jelas (tidak buram)</li>
+    <li id="m3">Latar belakang kabur</li>
+    <li id="m4">Foto bersih (tanpa noise berlebih)</li>
+  </ul>
+</div>
+
+<div class="bar">Kamera Virtual <span>Eksplorasi</span></div>
+<div class="sim">
+  <div class="scene">
+    <div class="bgl" id="bgl">
+      <i style="left:6%;top:10%;width:90px;height:90px;background:#f0b24b"></i>
+      <i style="left:70%;top:6%;width:120px;height:120px;background:#e0675b"></i>
+      <i style="left:14%;top:62%;width:110px;height:110px;background:#5aa7c9"></i>
+      <i style="left:62%;top:58%;width:80px;height:80px;background:#8fcf8a"></i>
+      <i style="left:40%;top:0%;width:60px;height:60px;background:#f7e08a"></i>
+      <i style="left:84%;top:40%;width:70px;height:70px;background:#c58ae0"></i>
+    </div>
+    <div class="obj" id="obj">
+      <svg viewBox="0 0 90 170" width="100" height="189" aria-hidden="true">
+        <rect x="33" y="2" width="24" height="16" rx="3" fill="#d6d6d6"/>
+        <path d="M33 18h24v18c10 10 14 18 14 32v90a8 8 0 0 1-8 8H27a8 8 0 0 1-8-8V68c0-14 4-22 14-32z" fill="#6b3a42"/>
+        <rect x="19" y="78" width="52" height="56" fill="#fff" opacity=".92"/>
+        <text x="45" y="104" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="700" fill="#6b3a42">JUS</text>
+        <text x="45" y="120" text-anchor="middle" font-family="Poppins,sans-serif" font-size="9" fill="#6b3a42">Jeruk</text>
+      </svg>
+    </div>
+    <div class="shade" id="shade"></div>
+    <svg class="noise" id="noise" width="100%" height="100%" aria-hidden="true"><filter id="nf"><feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#nf)"/></svg>
+  </div>
+  <div class="ctl">
+    <div class="row"><b>Aperture</b><input id="ap" type="range" min="0" max="7" value="5" aria-label="Aperture"><output id="apo"></output></div>
+    <div class="row"><b>Shutter</b><input id="sh" type="range" min="0" max="7" value="3" aria-label="Shutter speed"><output id="sho"></output></div>
+    <div class="row"><b>ISO</b><input id="is" type="range" min="0" max="6" value="0" aria-label="ISO"><output id="iso"></output></div>
+    <div class="read">
+      <div><b>Cahaya</b><span id="r1"></span></div>
+      <div><b>Latar belakang</b><span id="r2"></span></div>
+      <div><b>Kualitas</b><span id="r3"></span></div>
+    </div>
+    <button class="preset alt" id="p0">Atur ulang</button>
+    <button class="preset" id="p1">Lihat contoh jawaban</button>
+    <div class="win" id="win" role="status"><b>Misi selesai.</b> Fotomu memenuhi semua kriteria proyek: cahaya cukup, objek jelas, latar kabur, dan bersih dari noise.</div>
+  </div>
+</div>
+
+<div class="guide">
+  <h2>Cara menggunakan</h2>
+  <ul>
+    <li>Geser slider satu per satu dan amati perubahan pada foto serta tiga kotak hasil di bawahnya.</li>
+    <li>Aperture mengubah kekaburan latar, shutter speed memengaruhi getaran/gerakan, dan ISO memengaruhi noise.</li>
+    <li>Ketiganya juga mengubah kecerahan, jadi perubahan satu slider perlu diimbangi slider lain.</li>
+    <li>Catat pengaturan yang berhasil untuk bahan Aktivitas Project.</li>
+  </ul>
+</div>
+</main>
+
+<script>
+const AP=[1.8,2.8,4,5.6,8,11,16,22],SH=[1000,500,250,125,60,30,15,8],IS=[100,200,400,800,1600,3200,6400];
+const $=id=>document.getElementById(id);
+function upd(){
+  const a=+$('ap').value,s=+$('sh').value,i=+$('is').value;
+  $('apo').textContent='f/'+AP[a];$('sho').textContent='1/'+SH[s];$('iso').textContent=IS[i];
+  const st=Math.log2((5.6*5.6)/(AP[a]*AP[a])*(125/SH[s])*(IS[i]/100));
+  const sh=$('shade');
+  if(st<-0.7)sh.style.background='rgba(0,0,0,'+Math.min(.85,-st*.18)+')';
+  else if(st>0.7)sh.style.background='rgba(255,255,255,'+Math.min(.85,st*.18)+')';
+  else sh.style.background='transparent';
+  const light=Math.abs(st)<=0.7;
+  $('r1').textContent=st<-0.7?'Terlalu gelap':st>0.7?'Terlalu terang':'Pas';
+  const blur=Math.max(0,(22-AP[a])/22*14*(AP[a]<=11?1:0.3));
+  $('bgl').style.filter='blur('+blur.toFixed(1)+'px)';
+  $('r2').textContent=blur>7?'Sangat kabur':blur>3?'Cukup kabur':'Masih tajam';
+  const mb=SH[s]<30?(SH[s]<15?5:3):0;
+  $('obj').style.filter=mb?'blur('+mb+'px)':'none';
+  const nz=Math.max(0,(i-2)/4)*.75;
+  $('noise').style.opacity=nz.toFixed(2);
+  $('r3').textContent=mb?'Objek buram (getar)':nz>.4?'Banyak noise':nz>0?'Sedikit noise':'Bersih';
+  const c=[light,!mb,blur>7,nz<=.2];
+  c.forEach((v,k)=>$('m'+(k+1)).classList.toggle('done',v));
+  $('win').classList.toggle('show',c.every(Boolean));
+}
+['ap','sh','is'].forEach(k=>$(k).addEventListener('input',upd));
+$('p0').onclick=()=>{$('ap').value=5;$('sh').value=3;$('is').value=0;upd()};
+$('p1').onclick=()=>{$('ap').value=1;$('sh').value=3;$('is').value=1;upd()};
+upd();
+</script>
+</body>
+</html>
